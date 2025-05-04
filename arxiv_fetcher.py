@@ -62,6 +62,11 @@ class ArxivFetcher:
     def fetch_papers(self) -> List[Dict]:
         """Fetch papers from arXiv based on configured categories and search terms."""
         papers = []
+        # 获取当前日期
+        current_date = datetime.now()
+        # 只获取最近7天的文章
+        start_date = current_date - timedelta(days=7)
+
         for category in self.config['categories']:
             for search_term in self.config.get('search_terms', []):
                 try:
@@ -74,25 +79,29 @@ class ArxivFetcher:
                     )
 
                     for result in search.results():
-                        analysis = self._analyze_abstract(result.summary)
-                        paper = {
-                            'title': result.title,
-                            'authors': [author.name for author in result.authors],
-                            'abstract': result.summary,
-                            'pdf_url': result.pdf_url,
-                            'published': result.published,
-                            'updated': result.updated,
-                            'category': category,
-                            'search_term': search_term,
-                            'arxiv_id': result.entry_id.split('/')[-1],
-                            'analysis': analysis
-                        }
-                        papers.append(paper)
+                        # 只处理最近7天的文章
+                        if result.published.date() >= start_date.date():
+                            analysis = self._analyze_abstract(result.summary)
+                            paper = {
+                                'title': result.title,
+                                'authors': [author.name for author in result.authors],
+                                'abstract': result.summary,
+                                'pdf_url': result.pdf_url,
+                                'published': result.published,
+                                'updated': result.updated,
+                                'category': category,
+                                'search_term': search_term,
+                                'arxiv_id': result.entry_id.split('/')[-1],
+                                'analysis': analysis
+                            }
+                            papers.append(paper)
 
                     logging.info(f"Successfully fetched papers for query: {query}")
                 except Exception as e:
                     logging.error(f"Error fetching papers for query {query}: {str(e)}")
 
+        # 按发布日期降序排序
+        papers.sort(key=lambda x: x['published'], reverse=True)
         return papers
 
     def _generate_markdown(self, paper: Dict) -> str:
@@ -110,12 +119,6 @@ class ArxivFetcher:
 
 ## Key Points
 {chr(10).join(f'- {point}' for point in analysis['key_points'])}
-
-## Methodology
-{chr(10).join(f'- {method}' for method in analysis['methodology'])}
-
-## Results
-{chr(10).join(f'- {result}' for result in analysis['results'])}
 
 ## Abstract
 {paper['abstract']}

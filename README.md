@@ -101,8 +101,6 @@ After fetching papers, you'll see:
 - Paper titles and authors
 - Publication dates
 - Key points from abstracts
-- Methodology highlights
-- Results summary
 - Full abstracts
 - PDF download links
 
