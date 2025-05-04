@@ -1,31 +1,58 @@
 # arXiv Paper Fetcher
 
-This system automatically fetches papers from arXiv for specified research categories on a daily basis.
+A system that automatically fetches papers from arXiv for specific research fields.
 
 ## Features
 
-- **Automated Paper Fetching**: Daily retrieval of papers from specified arXiv categories
-- **Smart Analysis**: Automatic extraction of key points, methodology, and results
-- **Customizable Search**: Support for multiple search terms and categories
-- **Structured Output**: Generate detailed Markdown reports with paper summaries
+- Automatically fetch papers from arXiv based on configured categories and search terms
+- Daily automatic updates via cron job
+- Web interface for easy configuration
+- PDF download and organization
+- Logging for tracking paper fetching activities
 
-## Setup
+## Installation
 
-1. Install the required dependencies:
+1. Clone this repository:
+```bash
+git clone https://github.com/yourusername/arxiv-paper-fetcher.git
+cd arxiv-paper-fetcher
+```
+
+2. Install the required dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Configure the categories and search terms in `config.json`:
-- Edit the `categories` list to include the arXiv categories you're interested in
-- Add `search_terms` to specify keywords for paper search
-- Adjust `max_results` to control how many papers to fetch per category
-- Change `output_dir` to specify where to save the papers
+## Configuration
 
-Example configuration for image restoration papers:
+### Web Interface
+
+1. Start the web server:
+```bash
+python app.py
+```
+
+2. Open your browser and navigate to `http://localhost:5000`
+
+3. Configure your settings:
+   - Select arXiv categories (e.g., cs.CV for Computer Vision)
+   - Add search terms
+   - Set maximum number of results
+   - Specify output directory
+
+4. Click "Save Configuration" to save your settings
+
+5. Click "Fetch Papers Now" to manually trigger paper fetching
+
+### Manual Configuration
+
+You can also manually edit the `config.json` file:
+
 ```json
 {
-    "categories": ["cs.CV"],
+    "categories": [
+        "cs.CV"
+    ],
     "search_terms": [
         "image restoration",
         "image reconstruction",
@@ -40,37 +67,62 @@ Example configuration for image restoration papers:
 
 ## Usage
 
-### Basic Usage
-To fetch papers immediately:
+### Web Interface
+
+1. Start the web server:
 ```bash
-python arxiv_fetcher.py
+python app.py
 ```
 
-### Daily Automatic Run
-To start the daily fetcher:
+2. Access the web interface at `http://localhost:5000`
+
+3. Configure your settings and fetch papers
+
+### Command Line
+
+To fetch papers manually:
 ```bash
 python run_daily.py
 ```
 
-The script will run every day at 8:00 AM and save the results in the specified output directory.
+### Automatic Updates
 
-## Output
+To set up automatic daily updates:
 
-Papers are saved in Markdown format with the following sections:
-- Title and Authors
-- Category and Search Terms
-- Publication Date
-- Key Points (automatically extracted)
-- Methodology (automatically extracted)
-- Results (automatically extracted)
-- Full Abstract
-- PDF Link
+1. Open your crontab:
+```bash
+crontab -e
+```
 
-Files are named with the date format: `papers_YYYY-MM-DD.md`
+2. Add the following line to run the script daily at 8:00 AM:
+```bash
+0 8 * * * cd /path/to/arxiv-paper-fetcher && python run_daily.py >> arxiv_fetcher.log 2>&1
+```
+
+## Directory Structure
+
+```
+arxiv-paper-fetcher/
+├── app.py                 # Flask web application
+├── arxiv_fetcher.py       # Main paper fetching logic
+├── config.json            # Configuration file
+├── requirements.txt       # Python dependencies
+├── run_daily.py           # Script for daily execution
+├── papers/                # Directory for downloaded papers
+├── static/                # Static files for web interface
+│   └── css/
+│       └── style.css      # Custom styles
+└── templates/             # HTML templates
+    └── index.html         # Main web interface
+```
 
 ## Logging
 
-Logs are saved in `arxiv_fetcher.log` and also displayed in the console.
+The system logs all activities to `arxiv_fetcher.log`. You can check this file to monitor the paper fetching process and troubleshoot any issues.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Available arXiv Categories
 

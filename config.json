@@ -4,11 +4,8 @@
     ],
     "search_terms": [
         "image restoration",
-        "image reconstruction",
-        "image denoising",
-        "image super-resolution",
-        "image inpainting"
+        "image super-resolution"
     ],
-    "max_results": 20,
+    "max_results": 10,
     "output_dir": "papers"
 }
