@@ -1,0 +1,14 @@
+{
+    "categories": [
+        "cs.CV"
+    ],
+    "search_terms": [
+        "image restoration",
+        "image reconstruction",
+        "image denoising",
+        "image super-resolution",
+        "image inpainting"
+    ],
+    "max_results": 20,
+    "output_dir": "papers"
+}
