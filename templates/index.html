@@ -100,7 +100,8 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    alert('Papers fetched successfully!');
+                    const currentDate = new Date().toISOString().split('T')[0];
+                    window.location.href = `/papers/${currentDate}`;
                 } else {
                     alert('Error: ' + data.message);
                 }

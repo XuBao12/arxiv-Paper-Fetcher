@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for
 import json
 import os
 from arxiv_fetcher import ArxivFetcher
+import markdown
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
@@ -41,11 +43,54 @@ def update_config():
 @app.route('/fetch_papers', methods=['POST'])
 def fetch_papers():
     try:
+        # 确保 papers 目录存在
+        os.makedirs('papers', exist_ok=True)
+
         fetcher = ArxivFetcher()
-        fetcher.fetch_papers()
-        return jsonify({"status": "success", "message": "Papers fetched successfully"})
+        papers = fetcher.fetch_papers()
+
+        # 保存论文到文件
+        fetcher.save_papers(papers)
+
+        # 生成当前日期的文件名
+        current_date = datetime.now().strftime('%Y-%m-%d')
+        output_file = os.path.join('papers', f'papers_{current_date}.md')
+
+        # 检查文件是否已经存在
+        if not os.path.exists(output_file):
+            return jsonify({
+                "status": "error",
+                "message": "No papers were fetched. Please check your configuration and try again."
+            }), 404
+
+        # 读取生成的 Markdown 文件内容
+        with open(output_file, 'r', encoding='utf-8') as f:
+            markdown_content = f.read()
+
+        # 将 Markdown 转换为 HTML
+        html_content = markdown.markdown(markdown_content, extensions=['fenced_code', 'tables'])
+
+        return jsonify({
+            "status": "success",
+            "message": "Papers fetched successfully",
+            "content": html_content
+        })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/papers/<date>')
+def show_papers(date):
+    try:
+        output_file = os.path.join('papers', f'papers_{date}.md')
+        if not os.path.exists(output_file):
+            return render_template('no_papers.html', date=date)
+
+        with open(output_file, 'r', encoding='utf-8') as f:
+            markdown_content = f.read()
+        html_content = markdown.markdown(markdown_content, extensions=['fenced_code', 'tables'])
+        return render_template('papers.html', content=html_content, date=date)
+    except Exception as e:
+        return render_template('error.html', error=str(e))
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=True)
