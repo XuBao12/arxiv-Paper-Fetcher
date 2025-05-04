@@ -5,10 +5,11 @@ A system that automatically fetches papers from arXiv for specific research fiel
 ## Features
 
 - Automatically fetch papers from arXiv based on configured categories and search terms
-- Daily automatic updates via cron job
 - Web interface for easy configuration
 - PDF download and organization
 - Logging for tracking paper fetching activities
+- Beautiful paper display interface with Markdown formatting
+- Error handling and user-friendly error messages
 
 ## Installation
 
@@ -32,7 +33,7 @@ pip install -r requirements.txt
 python app.py
 ```
 
-2. Open your browser and navigate to `http://localhost:5000`
+2. Open your browser and navigate to `http://localhost:8080`
 
 3. Configure your settings:
    - Select arXiv categories (e.g., cs.CV for Computer Vision)
@@ -74,30 +75,44 @@ You can also manually edit the `config.json` file:
 python app.py
 ```
 
-2. Access the web interface at `http://localhost:5000`
+2. Access the web interface at `http://localhost:8080`
 
-3. Configure your settings and fetch papers
+3. Configure your settings:
+   - Select one or more arXiv categories
+   - Add search terms (one per line)
+   - Set the maximum number of results
+   - Specify the output directory
+
+4. Click "Fetch Papers Now" to:
+   - Fetch papers from arXiv
+   - Save them as Markdown files
+   - Display them in a formatted view
 
 ### Command Line
 
 To fetch papers manually:
 ```bash
-python run_daily.py
+python arxiv_fetcher.py
 ```
 
-### Automatic Updates
+### Paper Display
 
-To set up automatic daily updates:
+After fetching papers, you'll see:
+- Paper titles and authors
+- Publication dates
+- Key points from abstracts
+- Methodology highlights
+- Results summary
+- Full abstracts
+- PDF download links
 
-1. Open your crontab:
-```bash
-crontab -e
-```
+### Error Handling
 
-2. Add the following line to run the script daily at 8:00 AM:
-```bash
-0 8 * * * cd /path/to/arxiv-paper-fetcher && python run_daily.py >> arxiv_fetcher.log 2>&1
-```
+The system provides clear error messages for:
+- No papers found
+- Network errors
+- Configuration issues
+- File system errors
 
 ## Directory Structure
 
@@ -107,13 +122,15 @@ arxiv-paper-fetcher/
 ├── arxiv_fetcher.py       # Main paper fetching logic
 ├── config.json            # Configuration file
 ├── requirements.txt       # Python dependencies
-├── run_daily.py           # Script for daily execution
 ├── papers/                # Directory for downloaded papers
 ├── static/                # Static files for web interface
 │   └── css/
 │       └── style.css      # Custom styles
 └── templates/             # HTML templates
-    └── index.html         # Main web interface
+    ├── index.html         # Main web interface
+    ├── papers.html        # Paper display template
+    ├── error.html         # Error page template
+    └── no_papers.html     # No papers found template
 ```
 
 ## Logging
@@ -136,18 +153,22 @@ Some common categories:
 
 For a complete list of categories, visit: https://arxiv.org/help/api/user-manual#subject_classifications
 
-## Cost and Limitations
-
-- **arXiv API**: Free to use, with rate limits (recommended: no more than 1 request per minute)
-- **Storage**: Local storage only, no cloud costs
-- **Network**: Only requires standard internet connection
-
 ## Troubleshooting
 
-1. **API Rate Limits**: If you encounter rate limit errors, try:
-   - Reducing the number of papers fetched
-   - Adding delays between requests
-   - Using the daily scheduler instead of frequent manual runs
+1. **No Papers Found**
+   - Check your internet connection
+   - Verify your search terms and categories
+   - Ensure you have selected at least one category and search term
+
+2. **API Rate Limits**
+   - If you encounter rate limit errors, try:
+     - Reducing the number of papers fetched
+     - Adding delays between requests
+
+3. **File System Errors**
+   - Ensure the `papers` directory exists and is writable
+   - Check file permissions
+   - Verify disk space availability
 
 ## Contributing
 
