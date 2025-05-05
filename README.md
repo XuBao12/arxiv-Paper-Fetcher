@@ -1,53 +1,53 @@
 # arXiv Paper Fetcher
 
-A system that automatically fetches papers from arXiv for specific research fields.
+一个自动从 arXiv 获取特定研究领域论文的系统。
 
-## Features
+## 功能特点
 
-- Automatically fetch papers from arXiv based on configured categories and search terms
-- Web interface for easy configuration
-- PDF download and organization
-- Logging for tracking paper fetching activities
-- Beautiful paper display interface with Markdown formatting
-- Error handling and user-friendly error messages
+- 根据配置的类别和搜索词自动从 arXiv 获取论文
+- 提供方便配置的 Web 界面
+- PDF 下载和组织
+- 记录论文获取活动的日志
+- 使用 Markdown 格式美观展示论文
+- 错误处理和用户友好的错误消息
 
-## Installation
+## 安装
 
-1. Clone this repository:
+1. 克隆此仓库:
 ```bash
 git clone https://github.com/yourusername/arxiv-paper-fetcher.git
 cd arxiv-paper-fetcher
 ```
 
-2. Install the required dependencies:
+2. 安装所需的依赖:
 ```bash
 pip install -r requirements.txt
 ```
 
-## Configuration
+## 配置
 
-### Web Interface
+### Web 界面
 
-1. Start the web server:
+1. 启动 Web 服务器:
 ```bash
-python app.py
+python main.py
 ```
 
-2. Open your browser and navigate to `http://localhost:8080`
+2. 在浏览器中打开 `http://localhost:8080`
 
-3. Configure your settings:
-   - Select arXiv categories (e.g., cs.CV for Computer Vision)
-   - Add search terms
-   - Set maximum number of results
-   - Specify output directory
+3. 配置您的设置:
+   - 选择 arXiv 类别（如 cs.CV 表示计算机视觉）
+   - 添加搜索词
+   - 设置最大结果数
+   - 指定输出目录
 
-4. Click "Save Configuration" to save your settings
+4. 点击 "Save Configuration" 保存设置
 
-5. Click "Fetch Papers Now" to manually trigger paper fetching
+5. 点击 "Fetch Papers Now" 手动触发论文获取
 
-### Manual Configuration
+### 手动配置
 
-You can also manually edit the `config.json` file:
+您也可以手动编辑 `config.json` 文件:
 
 ```json
 {
@@ -66,107 +66,93 @@ You can also manually edit the `config.json` file:
 }
 ```
 
-## Usage
+## 使用方法
 
-### Web Interface
+### Web 界面
 
-1. Start the web server:
+1. 启动 Web 服务器:
 ```bash
-python app.py
+python main.py
 ```
 
-2. Access the web interface at `http://localhost:8080`
+2. 访问 `http://localhost:8080` 进入 Web 界面
 
-3. Configure your settings:
-   - Select one or more arXiv categories
-   - Add search terms (one per line)
-   - Set the maximum number of results
-   - Specify the output directory
+3. 配置设置:
+   - 选择一个或多个 arXiv 类别
+   - 添加搜索词（每行一个）
+   - 设置最大结果数
+   - 指定输出目录
 
-4. Click "Fetch Papers Now" to:
-   - Fetch papers from arXiv
-   - Save them as Markdown files
-   - Display them in a formatted view
+4. 点击 "Fetch Papers Now" 执行:
+   - 从 arXiv 获取论文
+   - 将它们保存为 Markdown 文件
+   - 以格式化视图显示
 
-### Command Line
+### 命令行
 
-To fetch papers manually:
+要手动获取论文:
 ```bash
-python arxiv_fetcher.py
+python main.py --fetch
 ```
 
-### Paper Display
+要指定端口运行 Web 服务:
+```bash
+python main.py --port 8888
+```
 
-After fetching papers, you'll see:
-- Paper titles and authors
-- Publication dates
-- Key points from abstracts
-- Full abstracts
-- PDF download links
+### 论文展示
 
-### Error Handling
+获取论文后，您将看到:
+- 论文标题和作者
+- 发布日期
+- 摘要要点
+- 完整摘要
+- PDF 下载链接
 
-The system provides clear error messages for:
-- No papers found
-- Network errors
-- Configuration issues
-- File system errors
 
-## Directory Structure
+## 目录结构
 
 ```
 arxiv-paper-fetcher/
-├── app.py                 # Flask web application
-├── arxiv_fetcher.py       # Main paper fetching logic
-├── config.json            # Configuration file
-├── requirements.txt       # Python dependencies
-├── papers/                # Directory for downloaded papers
-├── static/                # Static files for web interface
-│   └── css/
-│       └── style.css      # Custom styles
-└── templates/             # HTML templates
-    ├── index.html         # Main web interface
-    ├── papers.html        # Paper display template
-    ├── error.html         # Error page template
-    └── no_papers.html     # No papers found template
+├── main.py                # 主入口文件
+├── config.json            # 配置文件
+├── requirements.txt       # Python 依赖
+├── papers/                # 下载的论文目录
+├── src/                   # 源代码目录
+│   ├── __init__.py        # 包初始化文件
+│   ├── arxiv_fetcher.py   # 主要论文获取逻辑
+│   ├── app.py             # Flask Web 应用
+│   ├── static/            # 静态文件目录
+│   │   └── css/
+│   │       └── style.css  # 自定义样式
+│   └── templates/         # HTML 模板
+│       ├── index.html     # 主 Web 界面
+│       ├── papers.html    # 论文显示模板
+│       ├── error.html     # 错误页面模板
+│       └── no_papers.html # 未找到论文模板
+└── arxiv_fetcher.log      # 日志文件
 ```
 
-## Logging
+## 日志
 
-The system logs all activities to `arxiv_fetcher.log`. You can check this file to monitor the paper fetching process and troubleshoot any issues.
+系统将所有活动记录到 `arxiv_fetcher.log` 文件中。您可以查看此文件来监控论文获取过程并排除任何问题。
 
-## License
+## 许可证
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+此项目根据 MIT 许可证授权 - 有关详细信息，请参阅 [LICENSE](LICENSE) 文件。
 
-## Available arXiv Categories
+## 可用的 arXiv 类别
 
-Some common categories:
-- cs.AI (Artificial Intelligence)
-- cs.CL (Computation and Language)
-- cs.LG (Machine Learning)
-- cs.CV (Computer Vision)
-- cs.NE (Neural and Evolutionary Computing)
-- stat.ML (Machine Learning)
+一些常见类别:
+- cs.AI (人工智能)
+- cs.CL (计算和语言)
+- cs.LG (机器学习)
+- cs.CV (计算机视觉)
+- cs.NE (神经和进化计算)
+- stat.ML (机器学习)
 
-For a complete list of categories, visit: https://arxiv.org/help/api/user-manual#subject_classifications
+有关类别的完整列表，请访问: https://arxiv.org/help/api/user-manual#subject_classifications
 
-## Troubleshooting
-
-1. **No Papers Found**
-   - Check your internet connection
-   - Verify your search terms and categories
-   - Ensure you have selected at least one category and search term
-
-2. **API Rate Limits**
-   - If you encounter rate limit errors, try:
-     - Reducing the number of papers fetched
-     - Adding delays between requests
-
-3. **File System Errors**
-   - Ensure the `papers` directory exists and is writable
-   - Check file permissions
-   - Verify disk space availability
 
 ## Contributing
 

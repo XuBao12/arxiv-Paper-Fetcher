@@ -1,0 +1,6 @@
+include LICENSE
+include README.md
+include requirements.txt
+include config.json
+recursive-include src/templates *.html
+recursive-include src/static/css *.css

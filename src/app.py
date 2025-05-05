@@ -1,11 +1,13 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 import json
 import os
-from arxiv_fetcher import ArxivFetcher
+from src.arxiv_fetcher import ArxivFetcher
 import markdown
 from datetime import datetime
 
-app = Flask(__name__)
+app = Flask(__name__,
+           template_folder='templates',
+           static_folder='static')
 app.config['SECRET_KEY'] = os.urandom(24)
 
 def load_config():
