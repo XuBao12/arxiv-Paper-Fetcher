@@ -170,7 +170,14 @@ class ArxivFetcher:
         try:
             with open(output_file, 'w', encoding='utf-8') as f:
                 f.write(f"# arXiv Papers Summary - {date_str}\n\n")
-                f.write(f"## Search Terms: {', '.join(self.config.get('search_terms', []))}\n\n")
+
+                # 改进搜索词的格式，使每个搜索词单独一行，更容易解析
+                search_terms = self.config.get('search_terms', [])
+                f.write(f"## Search Terms\n")
+                f.write("<p>\n")
+                f.write(f"{', '.join(search_terms)}\n")
+                f.write("</p>\n\n")
+
                 for paper in papers:
                     f.write(self._generate_markdown(paper))
 

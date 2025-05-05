@@ -5,53 +5,414 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Papers - {{ date }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .paper-content {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        .paper-separator {
+            height: 1px;
+            background-image: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.1), transparent);
+            margin: 2rem 0;
         }
+
+        h1, h2, h3 {
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+        }
+
         .paper-title {
-            color: #2c3e50;
-            margin-bottom: 1.5rem;
+            border-left: 5px solid var(--primary-color);
+            padding-left: 15px;
         }
+
         .paper-meta {
-            color: #7f8c8d;
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-        .paper-abstract {
-            line-height: 1.6;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: 0.5rem;
             margin-bottom: 1.5rem;
         }
+
+        .paper-meta-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .paper-meta-item i {
+            margin-right: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .paper-abstract {
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            text-align: justify;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
         .paper-link {
-            color: #3498db;
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            background-color: var(--primary-color);
+            color: white;
             text-decoration: none;
+            font-weight: 500;
+            transition: all var(--transition-speed) ease;
         }
+
         .paper-link:hover {
-            text-decoration: underline;
+            background-color: #3367d6;
+            color: white;
+            transform: translateY(-2px);
         }
+
+        .paper-link i {
+            margin-right: 0.5rem;
+        }
+
         .back-button {
             margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .page-header:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background-image: linear-gradient(to right, var(--primary-color), transparent);
+        }
+
+        .search-terms {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background-color: rgba(66, 133, 244, 0.05);
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .search-terms:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background-color: rgba(66, 133, 244, 0.08);
+        }
+
+        .search-terms h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .search-term-badge {
+            display: inline-block;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            line-height: 1;
+            color: #fff;
+            background-color: var(--primary-color);
+            border-radius: 0.375rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .search-term-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            background-color: #3367d6;
+        }
+
+        .search-term-badge.active {
+            background-color: #ea4335;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .paper-highlight {
+            border-left: 4px solid #ea4335;
+            padding-left: 1rem;
+            background-color: rgba(234, 67, 53, 0.05);
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .paper-highlight {
+            background-color: rgba(234, 67, 53, 0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body.dark-mode .paper-meta {
+                background-color: rgba(255, 255, 255, 0.05);
+            }
+
+            body.dark-mode .search-terms {
+                background-color: rgba(66, 133, 244, 0.1);
+            }
+
+            body.dark-mode .paper-separator {
+                background-image: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+            }
+        }
+
+        .github-corner:hover .octo-arm {
+            animation: octocat-wave 560ms ease-in-out
+        }
+        @keyframes octocat-wave {
+            0%, 100% { transform: rotate(0) }
+            20%, 60% { transform: rotate(-25deg) }
+            40%, 80% { transform: rotate(10deg) }
+        }
+        @media (max-width: 500px) {
+            .github-corner:hover .octo-arm {
+                animation: none
+            }
+            .github-corner .octo-arm {
+                animation: octocat-wave 560ms ease-in-out
+            }
+            .github-corner svg {
+                width: 60px;
+                height: 60px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- GitHub Corner -->
+    <a href="{{ github_url }}" class="github-corner" aria-label="View source on GitHub">
+        <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; right: 0; border: 0; z-index: 1000;" aria-hidden="true">
+            <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+            <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+            <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path>
+        </svg>
+    </a>
+
     <div class="container mt-5">
         <div class="back-button">
             <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
-                <i class="bi bi-arrow-left"></i> Back to Configuration
+                <i class="bi bi-arrow-left me-2"></i>Back to Configuration
             </a>
         </div>
 
         <div class="paper-content">
-            <h1 class="text-center mb-4">Papers for {{ date }}</h1>
-            {{ content | safe }}
+            <div class="page-header">
+                <h1 class="text-center">
+                    <i class="bi bi-journal-text me-2"></i>
+                    Papers for {{ date }}
+                </h1>
+                <p class="text-center text-muted">
+                    <i class="bi bi-calendar3 me-1"></i>{{ date }}
+                </p>
+            </div>
+
+            <div id="papers-content">
+                {{ content | safe }}
+            </div>
         </div>
+
+        <!-- Dark Mode Toggle -->
+        <div class="text-center mt-4">
+            <button class="btn btn-sm btn-outline-secondary" onclick="toggleDarkMode()">
+                <i class="bi bi-moon-stars me-1"></i><span id="dark-mode-text">Dark Mode</span>
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-5 text-center text-muted">
+            <p class="small">arXiv Paper Fetcher &copy; 2023</p>
+        </footer>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Check for saved dark mode preference
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('dark-mode-text').textContent = 'Light Mode';
+            }
+
+            // Transform the rendered content to make it more beautiful
+            enhancePaperDisplay();
+        });
+
+        function toggleDarkMode() {
+            const body = document.body;
+            const darkModeText = document.getElementById('dark-mode-text');
+
+            if (body.classList.contains('dark-mode')) {
+                body.classList.remove('dark-mode');
+                localStorage.setItem('darkMode', 'disabled');
+                darkModeText.textContent = 'Dark Mode';
+            } else {
+                body.classList.add('dark-mode');
+                localStorage.setItem('darkMode', 'enabled');
+                darkModeText.textContent = 'Light Mode';
+            }
+        }
+
+        function enhancePaperDisplay() {
+            const papersContent = document.getElementById('papers-content');
+
+            // 隐藏arXiv Papers Summary标题
+            const summaryHeading = papersContent.querySelector('h1');
+            if (summaryHeading && summaryHeading.textContent.includes('arXiv Papers Summary')) {
+                summaryHeading.style.display = 'none';
+            }
+
+            // Make paper titles more prominent
+            const allTitles = papersContent.querySelectorAll('h1');
+            allTitles.forEach(title => {
+                // 跳过已隐藏的Summary标题
+                if (title.style.display === 'none') return;
+
+                title.classList.add('paper-title');
+            });
+
+            // Enhance links
+            const links = papersContent.querySelectorAll('a');
+            links.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && href.includes('pdf')) {
+                    link.classList.add('paper-link');
+                    link.innerHTML = `<i class="bi bi-file-pdf"></i>Download PDF`;
+                }
+            });
+
+            // Add separators between papers
+            const hrElements = papersContent.querySelectorAll('hr');
+            hrElements.forEach(hr => {
+                hr.classList.add('paper-separator');
+            });
+
+            // Extract and enhance search terms section if it exists
+            const searchTermsHeading = papersContent.querySelector('h2');
+            if (searchTermsHeading && searchTermsHeading.textContent.includes('Search Terms')) {
+                // 查找搜索词的段落
+                const nextEl = searchTermsHeading.nextElementSibling;
+                let searchTermsText = '';
+
+                // 检查下一个元素是否为段落
+                if (nextEl && nextEl.tagName === 'P') {
+                    searchTermsText = nextEl.textContent.trim();
+                } else {
+                    // 如果不是段落，尝试直接获取文本节点
+                    const textNode = searchTermsHeading.nextSibling;
+                    if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+                        searchTermsText = textNode.textContent.trim();
+                    }
+                }
+
+                // 处理搜索词
+                const terms = searchTermsText.split(',').map(term => term.trim()).filter(term => term);
+
+                // 只有当搜索词存在时才创建搜索词区域
+                if (terms.length > 0) {
+                    // Create a new search terms section
+                    const searchTermsDiv = document.createElement('div');
+                    searchTermsDiv.className = 'search-terms';
+
+                    let searchTermsHTML = '<h3><i class="bi bi-search me-2"></i>Search Terms</h3><div>';
+                    terms.forEach(term => {
+                        searchTermsHTML += `<span class="search-term-badge" onclick="highlightPapers('${term}')">${term}</span>`;
+                    });
+                    searchTermsHTML += '</div>';
+
+                    searchTermsDiv.innerHTML = searchTermsHTML;
+
+                    // Insert it after the page header
+                    const pageHeader = document.querySelector('.page-header');
+                    pageHeader.insertAdjacentElement('afterend', searchTermsDiv);
+
+                    // 尝试移除原始的搜索词部分
+                    if (nextEl && nextEl.tagName === 'P') {
+                        nextEl.remove();
+                    }
+                    searchTermsHeading.remove();
+                } else {
+                    console.log("No search terms found in the text:", searchTermsText);
+                }
+            }
+        }
+
+        // 添加高亮论文的功能
+        function highlightPapers(term) {
+            // 清除任何之前的高亮
+            document.querySelectorAll('.paper-highlight').forEach(el => {
+                el.classList.remove('paper-highlight');
+            });
+
+            document.querySelectorAll('.search-term-badge').forEach(badge => {
+                badge.classList.remove('active');
+            });
+
+            // 高亮当前搜索词
+            const badges = document.querySelectorAll('.search-term-badge');
+            badges.forEach(badge => {
+                if (badge.textContent === term) {
+                    badge.classList.add('active');
+                }
+            });
+
+            // 查找所有包含该搜索词的论文
+            const allPapers = document.querySelectorAll('h1');
+            let found = false;
+
+            allPapers.forEach(paper => {
+                // 跳过隐藏的标题
+                if (paper.style.display === 'none') return;
+
+                // 找到该论文的容器
+                let paperContainer = paper.parentElement;
+                while (paperContainer && !paperContainer.querySelector('hr')) {
+                    paperContainer = paperContainer.parentElement;
+                }
+
+                if (!paperContainer) return;
+
+                // 检查这篇论文是否包含该搜索词
+                const searchTermInfo = paperContainer.textContent.includes(`Search Term: ${term}`);
+
+                if (searchTermInfo) {
+                    // 高亮这篇论文
+                    paperContainer.classList.add('paper-highlight');
+                    found = true;
+
+                    // 平滑滚动到这篇论文
+                    if (document.querySelectorAll('.paper-highlight').length === 1) {
+                        paperContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+            });
+
+            // 如果没有找到任何论文，显示提示
+            if (!found) {
+                alert(`No papers found for search term: ${term}`);
+            }
+        }
+    </script>
 </body>
 </html>

@@ -5,15 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>arXiv Paper Fetcher</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container mt-5">
-        <h1 class="text-center mb-4">arXiv Paper Fetcher Configuration</h1>
+    <!-- GitHub Corner -->
+    <a href="{{ github_url }}" class="github-corner" aria-label="View source on GitHub">
+        <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; right: 0; border: 0; z-index: 1000;" aria-hidden="true">
+            <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+            <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+            <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path>
+        </svg>
+    </a>
+    <style>
+        .github-corner:hover .octo-arm {
+            animation: octocat-wave 560ms ease-in-out
+        }
+        @keyframes octocat-wave {
+            0%, 100% { transform: rotate(0) }
+            20%, 60% { transform: rotate(-25deg) }
+            40%, 80% { transform: rotate(10deg) }
+        }
+        @media (max-width: 500px) {
+            .github-corner:hover .octo-arm {
+                animation: none
+            }
+            .github-corner .octo-arm {
+                animation: octocat-wave 560ms ease-in-out
+            }
+            .github-corner svg {
+                width: 60px;
+                height: 60px;
+            }
+        }
+    </style>
+
+    <!-- Header -->
+    <div class="app-header text-center">
+        <div class="container">
+            <h1 class="display-5"><i class="bi bi-journal-text me-2"></i>arXiv Paper Fetcher</h1>
+            <p class="lead">Configure your settings to fetch research papers from arXiv</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Status Messages -->
+        <div id="status-messages"></div>
 
         <form action="{{ url_for('update_config') }}" method="POST" class="needs-validation" novalidate>
             <div class="card mb-4">
-                <div class="card-header">
+                <div class="card-header d-flex align-items-center">
+                    <i class="bi bi-tag-fill me-2 text-primary"></i>
                     <h5 class="mb-0">Categories</h5>
                 </div>
                 <div class="card-body">
@@ -26,62 +71,186 @@
                             <option value="cs.CL" {% if 'cs.CL' in config.categories %}selected{% endif %}>Computation and Language</option>
                             <option value="cs.NE" {% if 'cs.NE' in config.categories %}selected{% endif %}>Neural and Evolutionary Computing</option>
                         </select>
-                        <div class="form-text">Hold Ctrl/Cmd to select multiple categories</div>
+                        <div class="form-text">
+                            <i class="bi bi-info-circle-fill me-1"></i>
+                            Hold Ctrl/Cmd to select multiple categories
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="card mb-4">
-                <div class="card-header">
+                <div class="card-header d-flex align-items-center">
+                    <i class="bi bi-search me-2 text-primary"></i>
                     <h5 class="mb-0">Search Terms</h5>
                 </div>
                 <div class="card-body">
                     <div id="search-terms-container">
                         {% for term in config.search_terms %}
                         <div class="input-group mb-2">
+                            <span class="input-group-text"><i class="bi bi-hash"></i></span>
                             <input type="text" class="form-control" name="search_terms" value="{{ term }}" required>
-                            <button type="button" class="btn btn-outline-danger" onclick="removeSearchTerm(this)">Remove</button>
+                            <button type="button" class="btn btn-outline-danger" onclick="removeSearchTerm(this)">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-outline-primary" onclick="addSearchTerm()">Add Search Term</button>
+                    <button type="button" class="btn btn-outline-primary" onclick="addSearchTerm()">
+                        <i class="bi bi-plus-lg me-1"></i>Add Search Term
+                    </button>
                 </div>
             </div>
 
             <div class="card mb-4">
-                <div class="card-header">
+                <div class="card-header d-flex align-items-center">
+                    <i class="bi bi-gear-fill me-2 text-primary"></i>
                     <h5 class="mb-0">Settings</h5>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
                         <label for="max_results" class="form-label">Maximum Results</label>
-                        <input type="number" class="form-control" id="max_results" name="max_results"
-                               value="{{ config.max_results }}" min="1" max="100" required>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-123"></i></span>
+                            <input type="number" class="form-control" id="max_results" name="max_results"
+                                value="{{ config.max_results }}" min="1" max="100" required>
+                        </div>
+                        <div class="form-text">Number of papers to fetch from each category/search term combination</div>
                     </div>
                     <div class="mb-3">
                         <label for="output_dir" class="form-label">Output Directory</label>
-                        <input type="text" class="form-control" id="output_dir" name="output_dir"
-                               value="{{ config.output_dir }}" required>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-folder"></i></span>
+                            <input type="text" class="form-control" id="output_dir" name="output_dir"
+                                value="{{ config.output_dir }}" required>
+                            <button type="button" class="btn btn-outline-primary" onclick="openDirectoryBrowser()">
+                                <i class="bi bi-folder-symlink me-1"></i>Browse
+                            </button>
+                        </div>
+                        <div class="form-text">Directory where papers will be saved</div>
                     </div>
                 </div>
             </div>
 
             <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary">Save Configuration</button>
-                <button type="button" class="btn btn-success" onclick="fetchPapers()">Fetch Papers Now</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save me-2"></i>Save Configuration
+                </button>
+                <button type="button" class="btn btn-success" onclick="fetchPapers()">
+                    <i class="bi bi-cloud-download me-2"></i>Fetch Papers Now
+                </button>
             </div>
         </form>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="text-center mt-4 d-none">
+            <div class="loading-spinner mb-2"></div>
+            <p>Fetching papers, please wait...</p>
+        </div>
+
+        <!-- Dark Mode Toggle -->
+        <div class="text-center mt-4">
+            <button class="btn btn-sm btn-outline-secondary" onclick="toggleDarkMode()">
+                <i class="bi bi-moon-stars me-1"></i><span id="dark-mode-text">Dark Mode</span>
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-5 text-center text-muted">
+            <p class="small">arXiv Paper Fetcher &copy; 2023</p>
+        </footer>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Check for saved dark mode preference
+        document.addEventListener('DOMContentLoaded', function() {
+            // 暗黑模式设置
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('dark-mode-text').textContent = 'Light Mode';
+            }
+
+            // 添加目录浏览相关事件监听器
+            // 选择当前目录
+            document.getElementById('select_dir_btn').addEventListener('click', function() {
+                const outputDir = document.getElementById('output_dir');
+                // 如果路径为空，设置为默认值"papers"
+                outputDir.value = currentPath || 'papers';
+                bootstrap.Modal.getInstance(document.getElementById('directoryModal')).hide();
+            });
+
+            // 切换创建目录输入框
+            document.getElementById('create_dir_checkbox').addEventListener('change', function() {
+                document.getElementById('new_dir_group').classList.toggle('d-none', !this.checked);
+            });
+
+            // 创建新目录
+            document.getElementById('create_dir_btn').addEventListener('click', function() {
+                const dirName = document.getElementById('new_dir_name').value.trim();
+                if (dirName) {
+                    fetch('/create_directory', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            parent: currentPath,
+                            name: dirName
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // 重新加载当前目录
+                            loadDirectory(currentPath);
+                            document.getElementById('new_dir_name').value = '';
+                            document.getElementById('create_dir_checkbox').checked = false;
+                            document.getElementById('new_dir_group').classList.add('d-none');
+                        } else {
+                            alert(`Error creating directory: ${data.message}`);
+                        }
+                    })
+                    .catch(error => {
+                        alert(`Error creating directory: ${error}`);
+                    });
+                }
+            });
+
+            // 上一级目录按钮
+            document.getElementById('go_parent').addEventListener('click', function() {
+                if (currentPath) {
+                    const parentPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+                    loadDirectory(parentPath);
+                }
+            });
+        });
+
+        function toggleDarkMode() {
+            const body = document.body;
+            const darkModeText = document.getElementById('dark-mode-text');
+
+            if (body.classList.contains('dark-mode')) {
+                body.classList.remove('dark-mode');
+                localStorage.setItem('darkMode', 'disabled');
+                darkModeText.textContent = 'Dark Mode';
+            } else {
+                body.classList.add('dark-mode');
+                localStorage.setItem('darkMode', 'enabled');
+                darkModeText.textContent = 'Light Mode';
+            }
+        }
+
         function addSearchTerm() {
             const container = document.getElementById('search-terms-container');
             const div = document.createElement('div');
             div.className = 'input-group mb-2';
             div.innerHTML = `
+                <span class="input-group-text"><i class="bi bi-hash"></i></span>
                 <input type="text" class="form-control" name="search_terms" required>
-                <button type="button" class="btn btn-outline-danger" onclick="removeSearchTerm(this)">Remove</button>
+                <button type="button" class="btn btn-outline-danger" onclick="removeSearchTerm(this)">
+                    <i class="bi bi-trash"></i>
+                </button>
             `;
             container.appendChild(div);
         }
@@ -90,7 +259,29 @@
             button.parentElement.remove();
         }
 
+        function showMessage(type, message) {
+            const messagesContainer = document.getElementById('status-messages');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            messagesContainer.appendChild(alert);
+
+            // Auto dismiss after 5 seconds
+            setTimeout(() => {
+                alert.classList.remove('show');
+                setTimeout(() => {
+                    messagesContainer.removeChild(alert);
+                }, 150);
+            }, 5000);
+        }
+
         function fetchPapers() {
+            // Show loading indicator
+            document.getElementById('loading').classList.remove('d-none');
+
             fetch('/fetch_papers', {
                 method: 'POST',
                 headers: {
@@ -99,17 +290,166 @@
             })
             .then(response => response.json())
             .then(data => {
+                // Hide loading indicator
+                document.getElementById('loading').classList.add('d-none');
+
                 if (data.status === 'success') {
                     const currentDate = new Date().toISOString().split('T')[0];
                     window.location.href = `/papers/${currentDate}`;
                 } else {
-                    alert('Error: ' + data.message);
+                    showMessage('danger', `<i class="bi bi-exclamation-triangle-fill me-2"></i>${data.message}`);
                 }
             })
             .catch(error => {
-                alert('Error: ' + error);
+                // Hide loading indicator
+                document.getElementById('loading').classList.add('d-none');
+                showMessage('danger', `<i class="bi bi-exclamation-triangle-fill me-2"></i>Error: ${error}`);
             });
         }
+
+        // 目录浏览相关函数
+        let currentPath = '';
+
+        function openDirectoryBrowser() {
+            // 初始化目录浏览
+            currentPath = '';
+            loadDirectory(currentPath);
+
+            // 显示模态对话框
+            const directoryModal = new bootstrap.Modal(document.getElementById('directoryModal'));
+            directoryModal.show();
+        }
+
+        function loadDirectory(path) {
+            // 显示加载中
+            const directoryList = document.getElementById('directory_list');
+            directoryList.innerHTML = '<div class="text-center p-3"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Loading directories...</p></div>';
+
+            // 请求目录内容
+            fetch('/browse_directory', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ path: path })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    currentPath = data.path;
+                    document.getElementById('current_path').value = currentPath;
+
+                    // 更新目录列表
+                    directoryList.innerHTML = '';
+
+                    // 添加父目录链接
+                    if (data.parent) {
+                        const parentItem = document.createElement('a');
+                        parentItem.href = '#';
+                        parentItem.className = 'list-group-item list-group-item-action';
+                        parentItem.innerHTML = '<i class="bi bi-arrow-up me-2"></i>.. (Parent Directory)';
+                        parentItem.onclick = function(e) {
+                            e.preventDefault();
+                            loadDirectory(data.parent.path);
+                        };
+                        directoryList.appendChild(parentItem);
+                    }
+
+                    // 添加子目录
+                    if (data.items.length === 0) {
+                        directoryList.innerHTML += '<div class="text-center p-3 text-muted">No subdirectories found</div>';
+                    } else {
+                        data.items.sort((a, b) => a.name.localeCompare(b.name)).forEach(item => {
+                            const listItem = document.createElement('a');
+                            listItem.href = '#';
+                            listItem.className = 'list-group-item list-group-item-action';
+                            listItem.innerHTML = `<i class="bi bi-folder me-2"></i>${item.name}`;
+                            listItem.onclick = function(e) {
+                                e.preventDefault();
+                                loadDirectory(item.path);
+                            };
+                            directoryList.appendChild(listItem);
+                        });
+                    }
+                } else {
+                    directoryList.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+                }
+            })
+            .catch(error => {
+                directoryList.innerHTML = `<div class="alert alert-danger">Error: ${error}</div>`;
+            });
+        }
+
+        // Form validation
+        (function () {
+            'use strict'
+
+            const forms = document.querySelectorAll('.needs-validation')
+
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
     </script>
+
+    <!-- Directory Browser Modal -->
+    <div class="modal fade" id="directoryModal" tabindex="-1" aria-labelledby="directoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="directoryModalLabel">Select Output Directory</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Current Path</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="current_path" readonly>
+                            <button class="btn btn-outline-secondary" type="button" id="go_parent">
+                                <i class="bi bi-arrow-up"></i> Parent
+                            </button>
+                        </div>
+                    </div>
+                    <div class="list-group" id="directory_list">
+                        <!-- Directories will be loaded here -->
+                        <div class="text-center p-3">
+                            <p class="text-muted">Click the Browse button to load directories</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="create_dir_checkbox">
+                                    <label class="form-check-label" for="create_dir_checkbox">
+                                        Create new directory
+                                    </label>
+                                </div>
+                                <div class="input-group mt-2 d-none" id="new_dir_group">
+                                    <input type="text" class="form-control" id="new_dir_name" placeholder="New directory name">
+                                    <button class="btn btn-outline-primary" type="button" id="create_dir_btn">
+                                        <i class="bi bi-folder-plus"></i> Create
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" id="select_dir_btn">Select This Directory</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
