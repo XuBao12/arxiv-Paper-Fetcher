@@ -22,6 +22,27 @@ class ArxivFetcher:
         self.config = self._load_config(config_path)
         self.output_dir = self.config.get('output_dir', 'papers')
         os.makedirs(self.output_dir, exist_ok=True)
+        self.fetched_papers_file = os.path.join(self.output_dir, 'fetched_papers.json')
+        self.fetched_papers = self._load_fetched_papers()
+
+    def _load_fetched_papers(self) -> set:
+        """Load the set of previously fetched paper IDs."""
+        try:
+            if os.path.exists(self.fetched_papers_file):
+                with open(self.fetched_papers_file, 'r') as f:
+                    return set(json.load(f))
+            return set()
+        except Exception as e:
+            logging.error(f"Error loading fetched papers: {str(e)}")
+            return set()
+
+    def _save_fetched_papers(self):
+        """Save the set of fetched paper IDs to file."""
+        try:
+            with open(self.fetched_papers_file, 'w') as f:
+                json.dump(list(self.fetched_papers), f)
+        except Exception as e:
+            logging.error(f"Error saving fetched papers: {str(e)}")
 
     def _load_config(self, config_path: str) -> Dict:
         """Load configuration from JSON file."""
@@ -81,24 +102,32 @@ class ArxivFetcher:
                     for result in search.results():
                         # 只处理最近7天的文章
                         if result.published.date() >= start_date.date():
-                            analysis = self._analyze_abstract(result.summary)
-                            paper = {
-                                'title': result.title,
-                                'authors': [author.name for author in result.authors],
-                                'abstract': result.summary,
-                                'pdf_url': result.pdf_url,
-                                'published': result.published,
-                                'updated': result.updated,
-                                'category': category,
-                                'search_term': search_term,
-                                'arxiv_id': result.entry_id.split('/')[-1],
-                                'analysis': analysis
-                            }
-                            papers.append(paper)
+                            # 检查是否已经获取过这篇文章
+                            arxiv_id = result.entry_id.split('/')[-1]
+                            if arxiv_id not in self.fetched_papers:
+                                analysis = self._analyze_abstract(result.summary)
+                                paper = {
+                                    'title': result.title,
+                                    'authors': [author.name for author in result.authors],
+                                    'abstract': result.summary,
+                                    'pdf_url': result.pdf_url,
+                                    'published': result.published,
+                                    'updated': result.updated,
+                                    'category': category,
+                                    'search_term': search_term,
+                                    'arxiv_id': arxiv_id,
+                                    'analysis': analysis
+                                }
+                                papers.append(paper)
+                                # 记录已获取的文章ID
+                                self.fetched_papers.add(arxiv_id)
 
                     logging.info(f"Successfully fetched papers for query: {query}")
                 except Exception as e:
                     logging.error(f"Error fetching papers for query {query}: {str(e)}")
+
+        # 保存已获取的文章ID
+        self._save_fetched_papers()
 
         # 按发布日期降序排序
         papers.sort(key=lambda x: x['published'], reverse=True)
