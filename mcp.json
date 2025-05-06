@@ -1,0 +1,19 @@
+{
+    "mcpServers": {
+      "sequential-thinking": {
+        "command": "npx",
+        "args": [
+          "@modelcontextprotocol/server-sequential-thinking"
+        ]
+      },
+      "arxiv-mcp-server": {
+          "command": "uv",
+          "args": [
+              "tool",
+              "run",
+              "arxiv-mcp-server",
+              "--storage-path", "/Users/chenxiaxu/Workspace/ArxivFetcher/papers"
+          ]
+      }
+    }
+  }

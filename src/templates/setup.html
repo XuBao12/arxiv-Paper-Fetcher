@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup OpenAI API Key</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- GitHub Corner -->
+    <a href="{{ github_url }}" class="github-corner" aria-label="View source on GitHub">
+        <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; right: 0; border: 0; z-index: 1000;" aria-hidden="true">
+            <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+            <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+            <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path>
+        </svg>
+    </a>
+    <style>
+        .github-corner:hover .octo-arm {
+            animation: octocat-wave 560ms ease-in-out
+        }
+        @keyframes octocat-wave {
+            0%, 100% { transform: rotate(0) }
+            20%, 60% { transform: rotate(-25deg) }
+            40%, 80% { transform: rotate(10deg) }
+        }
+        @media (max-width: 500px) {
+            .github-corner:hover .octo-arm {
+                animation: none
+            }
+            .github-corner .octo-arm {
+                animation: octocat-wave 560ms ease-in-out
+            }
+            .github-corner svg {
+                width: 60px;
+                height: 60px;
+            }
+        }
+    </style>
+
+    <!-- Header -->
+    <div class="app-header text-center">
+        <div class="container">
+            <h1 class="display-5"><i class="bi bi-key me-2"></i>Setup API Key</h1>
+            <p class="lead">Configure your API key to enable the AI chatbot functionality</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Navigation -->
+        <div class="mb-4">
+            <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Main Page
+            </a>
+        </div>
+
+        <!-- Setup Form -->
+        <div class="card">
+            <div class="card-header d-flex align-items-center">
+                <i class="bi bi-gear-fill me-2 text-primary"></i>
+                <h5 class="mb-0">OpenAI API Configuration</h5>
+            </div>
+            <div class="card-body">
+                <div id="status-message" class="alert alert-info mb-4">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Please enter your OpenAI API key to enable the AI chatbot.
+                </div>
+
+                <form id="setup-form">
+                    <div class="mb-3">
+                        <label for="api_key" class="form-label">OpenAI API Key</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                            <input type="password" class="form-control" id="api_key"
+                                placeholder="sk-..." required>
+                            <button type="button" class="btn btn-outline-secondary" onclick="toggleApiKeyVisibility()">
+                                <i class="bi bi-eye" id="toggle-eye"></i>
+                            </button>
+                        </div>
+                        <div class="form-text">
+                            Your API key is stored locally and never sent to our servers.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="base_url" class="form-label">Base URL (Optional)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-globe"></i></span>
+                            <input type="text" class="form-control" id="base_url"
+                                placeholder="https://api.openai.com/v1">
+                        </div>
+                        <div class="form-text">
+                            Only required if using a proxy or custom endpoint.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="model" class="form-label">Model</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-cpu"></i></span>
+                            <select class="form-select" id="model">
+                                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                                <option value="gpt-4">GPT-4</option>
+                                <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                            </select>
+                        </div>
+                        <div class="form-text">
+                            Select the OpenAI model to use.
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Save Configuration
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Dark Mode Toggle -->
+        <div class="text-center mt-4">
+            <button class="btn btn-sm btn-outline-secondary" onclick="toggleDarkMode()">
+                <i class="bi bi-moon-stars me-1"></i><span id="dark-mode-text">Dark Mode</span>
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-5 text-center text-muted">
+            <p class="small">arXiv Paper Fetcher &copy; 2023</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Check for saved dark mode preference
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('dark-mode-text').textContent = 'Light Mode';
+            }
+        });
+
+        // Toggle dark mode
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            document.getElementById('dark-mode-text').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
+            localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+        }
+
+        // Toggle API key visibility
+        function toggleApiKeyVisibility() {
+            const apiKeyInput = document.getElementById('api_key');
+            const toggleEye = document.getElementById('toggle-eye');
+
+            if (apiKeyInput.type === 'password') {
+                apiKeyInput.type = 'text';
+                toggleEye.classList.remove('bi-eye');
+                toggleEye.classList.add('bi-eye-slash');
+            } else {
+                apiKeyInput.type = 'password';
+                toggleEye.classList.remove('bi-eye-slash');
+                toggleEye.classList.add('bi-eye');
+            }
+        }
+
+        // Setup form submission
+        document.getElementById('setup-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const apiKey = document.getElementById('api_key').value.trim();
+            const baseUrl = document.getElementById('base_url').value.trim();
+            const model = document.getElementById('model').value;
+
+            if (!apiKey) {
+                showStatus('Please enter your OpenAI API key.', 'alert-danger');
+                return;
+            }
+
+            // Show loading status
+            showStatus('Saving configuration...', 'alert-info');
+
+            // Send data to backend
+            fetch('/setup_env', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    api_key: apiKey,
+                    base_url: baseUrl,
+                    model: model
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showStatus('Configuration saved successfully! You can now use the chatbot.', 'alert-success');
+                    // Add a redirect button
+                    const statusDiv = document.getElementById('status-message');
+                    statusDiv.innerHTML += `
+                        <div class="mt-2">
+                            <a href="{{ url_for('chatbot') }}" class="btn btn-primary">
+                                <i class="bi bi-chat-dots me-2"></i>Go to Chatbot
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    showStatus(`Error: ${data.message}`, 'alert-danger');
+                }
+            })
+            .catch(error => {
+                showStatus(`Error: ${error.message}`, 'alert-danger');
+            });
+        });
+
+        // Show status message
+        function showStatus(message, className) {
+            const statusDiv = document.getElementById('status-message');
+            statusDiv.className = `alert ${className} mb-4`;
+            statusDiv.innerHTML = `<i class="bi ${className.includes('danger') ? 'bi-exclamation-triangle' :
+                className.includes('success') ? 'bi-check-circle' : 'bi-info-circle'} me-2"></i>${message}`;
+        }
+    </script>
+</body>
+</html>

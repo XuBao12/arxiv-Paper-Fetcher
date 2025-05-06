@@ -4,3 +4,5 @@ python-dotenv==1.0.0
 Flask==3.0.2
 Flask-WTF==1.2.1
 markdown==3.5.2
+openai==1.77.0
+mcp==1.7.1

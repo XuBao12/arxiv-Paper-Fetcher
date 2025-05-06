@@ -1,9 +1,12 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, Response
 import json
 import os
+import asyncio
 from src.arxiv_fetcher import ArxivFetcher
 import markdown
 from datetime import datetime
+from src.web_chatbot import get_chatbot
+import logging
 
 app = Flask(__name__,
            template_folder='templates',
@@ -167,6 +170,91 @@ def create_directory():
         return jsonify({
             'status': 'success',
             'path': new_dir
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+# 聊天机器人路由
+@app.route('/chatbot')
+def chatbot():
+    return render_template('chatbot.html', github_url=GITHUB_REPO_URL)
+
+@app.route('/setup')
+def setup():
+    return render_template('setup.html', github_url=GITHUB_REPO_URL)
+
+@app.route('/chat', methods=['POST', 'GET'])
+def chat():
+    try:
+        if request.method == 'POST':
+            message = request.json.get('message', '')
+        else:
+            message = request.args.get('message', '')
+
+        if not message:
+            return jsonify({'status': 'error', 'message': 'No message provided'}), 400
+
+        # 使用流式响应
+        def generate():
+            # 创建新的事件循环
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+            # 获取chatbot实例
+            chatbot_instance = loop.run_until_complete(get_chatbot())
+
+            # 调用流式处理方法
+            response_generator = chatbot_instance.process_query_stream(message)
+
+            # 遍历生成器的结果
+            try:
+                # 发送SSE连接成功标识
+                yield "data: {\"status\":\"connected\"}\n\n"
+
+                while True:
+                    chunk = loop.run_until_complete(anext(response_generator))
+                    yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+            except StopAsyncIteration:
+                # 生成器结束，发送完成标识
+                yield "data: {\"status\":\"complete\"}\n\n"
+            except Exception as e:
+                logging.error(f"流式响应出错: {str(e)}")
+                yield f"data: {json.dumps({'error': str(e)})}\n\n"
+            finally:
+                # 清理资源
+                loop.close()
+
+        # 设置SSE相关的响应头
+        response = Response(generate(), mimetype='text/event-stream')
+        response.headers['Cache-Control'] = 'no-cache'
+        response.headers['X-Accel-Buffering'] = 'no'  # 禁用Nginx缓冲
+        response.headers['Connection'] = 'keep-alive'
+        return response
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+# 创建.env文件的路由
+@app.route('/setup_env', methods=['POST'])
+def setup_env():
+    try:
+        api_key = request.json.get('api_key', '')
+        base_url = request.json.get('base_url', '')
+        model = request.json.get('model', 'gpt-3.5-turbo')
+
+        if not api_key:
+            return jsonify({'status': 'error', 'message': 'API Key is required'}), 400
+
+        # 创建或更新.env文件
+        env_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env')
+        with open(env_file_path, 'w') as f:
+            f.write(f'OPENAI_API_KEY={api_key}\n')
+            if base_url:
+                f.write(f'BASE_URL={base_url}\n')
+            f.write(f'MODEL={model}\n')
+
+        return jsonify({
+            'status': 'success',
+            'message': 'Environment configuration saved successfully'
         })
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
